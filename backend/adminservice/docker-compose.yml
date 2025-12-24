@@ -1,0 +1,24 @@
+  adminservice-dev:
+    build:
+      context: ./adminservice
+      dockerfile: Dockerfile
+    container_name: adminservice-dev
+    command: npm run start:dev
+    ports:
+      - "3002:3002"
+      - "50052:50052"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/authdb
+      - JWT_SECRET=your-jwt-secret-key
+    volumes:
+      - ./backend/adminservice/src:/usr/src/app/src
+      - ./backend/adminservice/node_modules:/usr/src/app/node_modules
+      - ./backend/adminservice/prisma:/usr/src/app/prisma
+      - ./backend/adminservice/.env:/usr/src/app/.env
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - earnings-app-network 

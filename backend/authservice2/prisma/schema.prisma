@@ -1,0 +1,48 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/* ────────────────  TABLES  ──────────────── */
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  username     String         @unique
+  dob          DateTime?
+  passwordHash String?
+  role         UserRole       @default(USER)
+  isVerified   Boolean        @default(false)
+  firstName    String?        // nullable first name
+  lastName     String?        // nullable last name
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id         String    @id                 // this UUID **is** the cookie value
+  tokenHash  String
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  expiresAt  DateTime
+  revoked    Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+}
+
+/* ────────────────  ENUMS  ──────────────── */
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPERADMIN
+}

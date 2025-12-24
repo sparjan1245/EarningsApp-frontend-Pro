@@ -1,0 +1,17 @@
+Ticker,Company Name,Sector,Market Cap (B USD),Quarterly Revenue (B USD),EPS (USD),P/E Ratio,Fiscal Year,Fiscal Quarter,Earnings Date,Report Time
+AAPL,Apple Inc.,Technology,3000.50,394.33,6.16,32.47,2024,Q1,2024-01-25,day
+MSFT,Microsoft Corporation,Technology,2800.25,620.20,2.93,38.50,2024,Q2,2024-01-24,day
+GOOGL,Alphabet Inc.,Technology,1800.75,863.10,1.64,28.30,2024,Q4,2024-01-30,day
+AMZN,Amazon.com Inc.,Consumer Cyclical,1500.40,1699.61,0.94,45.20,2024,Q1,2024-02-01,day
+TSLA,Tesla Inc.,Consumer Cyclical,800.30,251.67,0.85,65.40,2024,Q4,2024-01-24,night
+META,Meta Platforms Inc.,Technology,1200.60,401.11,5.21,22.80,2024,Q4,2024-01-31,day
+NVDA,NVIDIA Corporation,Technology,2200.80,221.03,4.93,75.60,2024,Q4,2024-02-21,day
+JPM,JPMorgan Chase & Co.,Financial Services,500.45,158.10,4.44,12.30,2024,Q4,2024-01-12,day
+V,Visa Inc.,Financial Services,550.20,86.40,2.18,35.20,2024,Q1,2024-01-25,day
+JNJ,Johnson & Johnson,Healthcare,420.30,213.59,2.68,24.50,2024,Q4,2024-01-23,day
+WMT,Walmart Inc.,Consumer Defensive,450.60,160.80,1.68,28.90,2024,Q4,2024-02-20,day
+PG,Procter & Gamble Co.,Consumer Defensive,380.25,205.32,1.84,26.50,2024,Q2,2024-01-19,day
+MA,Mastercard Inc.,Financial Services,420.15,65.45,3.08,38.70,2024,Q1,2024-01-26,day
+DIS,The Walt Disney Company,Communication Services,180.50,235.12,0.63,22.40,2024,Q1,2024-02-07,day
+NFLX,Netflix Inc.,Communication Services,250.80,88.33,2.11,48.20,2024,Q4,2024-01-23,day
+

@@ -1,0 +1,541 @@
+{
+	"info": {
+		"_postman_id": "chat-api-collection",
+		"name": "Earnings App - Chat API",
+		"description": "Complete Postman collection for the Chat/Discussion module API endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "noauth"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login (Get JWT Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.access) {",
+									"        pm.environment.set('jwt_token', jsonData.access);",
+									"        pm.environment.set('user_id', jsonData.user.id);",
+									"        pm.environment.set('user_role', jsonData.user.role);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/signin",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "signin"]
+						},
+						"description": "Login to get JWT token. The token will be automatically saved to environment variable 'jwt_token'."
+					}
+				}
+			]
+		},
+		{
+			"name": "Topics",
+			"item": [
+				{
+					"name": "Get All Topics (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/chat/topics",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "topics"]
+						},
+						"description": "Get all active discussion topics. No authentication required."
+					}
+				},
+				{
+					"name": "Get Topic By ID (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/chat/topics/:topicId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "topics", ":topicId"],
+							"variable": [
+								{
+									"key": "topicId",
+									"value": "{{topic_id}}",
+									"description": "Topic UUID"
+								}
+							]
+						},
+						"description": "Get topic details by ID. No authentication required."
+					}
+				},
+				{
+					"name": "Create Topic (Admin Only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"New Discussion Topic\",\n    \"description\": \"This is a description of the discussion topic\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/chat/topics",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "topics"]
+						},
+						"description": "Create a new discussion topic. Requires ADMIN or SUPERADMIN role."
+					}
+				}
+			]
+		},
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Send Message to Topic",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"topicId\": \"{{topic_id}}\",\n    \"content\": \"Hello everyone! This is my message.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/chat/messages",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "messages"]
+						},
+						"description": "Send a message to a topic. User must be a member of the topic."
+					}
+				},
+				{
+					"name": "Send Message to Chat",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chatId\": \"{{chat_id}}\",\n    \"content\": \"Hello! This is a direct message.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/chat/messages",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "messages"]
+						},
+						"description": "Send a message to a one-to-one chat."
+					}
+				},
+				{
+					"name": "Get Messages from Topic",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/chat/messages?topicId={{topic_id}}&page=1&limit=50",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "messages"],
+							"query": [
+								{
+									"key": "topicId",
+									"value": "{{topic_id}}",
+									"description": "Topic UUID"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number"
+								},
+								{
+									"key": "limit",
+									"value": "50",
+									"description": "Messages per page"
+								}
+							]
+						},
+						"description": "Get messages from a topic with pagination."
+					}
+				},
+				{
+					"name": "Get Messages from Chat",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/chat/messages?chatId={{chat_id}}&page=1&limit=50",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "messages"],
+							"query": [
+								{
+									"key": "chatId",
+									"value": "{{chat_id}}",
+									"description": "Chat UUID"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number"
+								},
+								{
+									"key": "limit",
+									"value": "50",
+									"description": "Messages per page"
+								}
+							]
+						},
+						"description": "Get messages from a chat with pagination."
+					}
+				}
+			]
+		},
+		{
+			"name": "Chats",
+			"item": [
+				{
+					"name": "Get User Chats",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/chat/chats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "chats"]
+						},
+						"description": "Get all chats (topics and one-to-one) for the authenticated user."
+					}
+				},
+				{
+					"name": "Create One-to-One Chat",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/chat/chats/one-to-one/:userId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "chats", "one-to-one", ":userId"],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "{{other_user_id}}",
+									"description": "User ID to create chat with"
+								}
+							]
+						},
+						"description": "Create a one-to-one chat with another user."
+					}
+				}
+			]
+		},
+		{
+			"name": "User Blocking",
+			"item": [
+				{
+					"name": "Block User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"blockedId\": \"{{user_to_block_id}}\",\n    \"reason\": \"Inappropriate behavior\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/chat/block",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "block"]
+						},
+						"description": "Block a user. Blocked users cannot send you messages."
+					}
+				},
+				{
+					"name": "Unblock User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/chat/block/:blockedId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "block", ":blockedId"],
+							"variable": [
+								{
+									"key": "blockedId",
+									"value": "{{user_to_block_id}}",
+									"description": "User ID to unblock"
+								}
+							]
+						},
+						"description": "Unblock a previously blocked user."
+					}
+				},
+				{
+					"name": "Get Blocked Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/chat/blocked",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "blocked"]
+						},
+						"description": "Get list of all users blocked by the authenticated user."
+					}
+				}
+			]
+		},
+		{
+			"name": "Admin Functions",
+			"item": [
+				{
+					"name": "Suspend User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/chat/users/:userId/suspend",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "users", ":userId", "suspend"],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "{{user_to_suspend_id}}",
+									"description": "User ID to suspend"
+								}
+							]
+						},
+						"description": "Suspend a user (prevents them from sending messages). Requires ADMIN or SUPERADMIN role."
+					}
+				},
+				{
+					"name": "Unsuspend User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/chat/users/:userId/unsuspend",
+							"host": ["{{base_url}}"],
+							"path": ["api", "chat", "users", ":userId", "unsuspend"],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "{{user_to_suspend_id}}",
+									"description": "User ID to unsuspend"
+								}
+							]
+						},
+						"description": "Unsuspend a user. Requires ADMIN or SUPERADMIN role."
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string",
+			"description": "Base URL for the API Gateway. Alternative: http://localhost:5173 (through frontend nginx)"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string",
+			"description": "JWT token from login (auto-set by Login request)"
+		},
+		{
+			"key": "topic_id",
+			"value": "",
+			"type": "string",
+			"description": "Topic UUID (get from Get All Topics response)"
+		},
+		{
+			"key": "chat_id",
+			"value": "",
+			"type": "string",
+			"description": "Chat UUID (get from Get User Chats response)"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string",
+			"description": "Current user ID (auto-set by Login request)"
+		},
+		{
+			"key": "other_user_id",
+			"value": "",
+			"type": "string",
+			"description": "Other user ID for creating one-to-one chat"
+		},
+		{
+			"key": "user_to_block_id",
+			"value": "",
+			"type": "string",
+			"description": "User ID to block/unblock"
+		},
+		{
+			"key": "user_to_suspend_id",
+			"value": "",
+			"type": "string",
+			"description": "User ID to suspend/unsuspend (Admin only)"
+		}
+	]
+}
+

@@ -1,0 +1,12 @@
+# Docker Compose override for development
+# This excludes the frontend service so you can run it directly with npm run dev
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+version: '3.8'
+
+services:
+  # Exclude frontend - run it directly with npm run dev for hot-reload
+  frontend:
+    profiles:
+      - dont-start
+

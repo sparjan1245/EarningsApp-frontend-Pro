@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model FinancialRecord {
+  id            String    @id @default(uuid())
+  ticker        String
+  companyName   String?
+  sector        String?
+  marketCap     String?
+  revenue       String?
+  eps           String?
+  earningsDate  DateTime?
+  fiscalYear    Int
+  fiscalQuarter String
+  reportTime    String?
+  peRatio       String?
+
+  @@unique([ticker, fiscalYear, fiscalQuarter])
+}
+
+model LoginActivity {
+  id        String   @id
+  userId    String   @unique
+  lastLogin DateTime
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id
+  email     String
+  code      String
+  expiresAt DateTime
+}
+
+model User {
+  id            String         @id
+  email         String         @unique
+  password      String
+  username      String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now())
+  role          Role           @default(USER) // ✅ Ensures Role enum is used
+  dob           DateTime?
+  LoginActivity LoginActivity?
+  // Chat relations
+  createdTopics Topic[]        @relation("TopicCreator")
+  messages      Message[]
+  chatMembers   ChatMember[]
+  blockedUsers  UserBlock[]    @relation("Blocker")
+  blockedBy     UserBlock[]    @relation("Blocked")
+  suspended     Boolean        @default(false)
+}
+
+
+enum Role {
+  USER
+  ADMIN
+  BLOCKED
+  SUPER_ADMIN
+  SUPERADMIN
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String
+  entity     String
+  entityId   String?
+  timestamp  DateTime @default(now())
+  details    String?
+  userId     String?
+}
+
+// Chat and Discussion Models
+model Topic {
+  id          String      @id @default(uuid())
+  title       String
+  description String?
+  createdBy   String
+  creator     User        @relation("TopicCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  isActive    Boolean     @default(true)
+  chat        Chat?
+  messages    Message[]
+  
+  @@index([createdBy])
+  @@index([isActive])
+}
+
+model Chat {
+  id          String       @id @default(uuid())
+  type        ChatType     @default(GROUP)
+  topicId     String?      @unique
+  topic       Topic?       @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  lastMessageAt DateTime?
+  members     ChatMember[]
+  messages    Message[]
+  
+  @@index([topicId])
+  @@index([type])
+}
+
+enum ChatType {
+  GROUP
+  ONE_TO_ONE
+}
+
+model ChatMember {
+  id        String   @id @default(uuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt  DateTime @default(now())
+  leftAt    DateTime?
+  isActive  Boolean  @default(true)
+  
+  @@unique([chatId, userId])
+  @@index([userId])
+  @@index([chatId])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String?
+  chat      Chat?    @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  topicId   String?
+  topic     Topic?   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  edited    Boolean  @default(false)
+  deleted   Boolean  @default(false)
+  
+  @@index([chatId])
+  @@index([topicId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model UserBlock {
+  id          String   @id @default(uuid())
+  blockerId   String
+  blocker     User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId   String
+  blocked     User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  reason      String?
+  
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}

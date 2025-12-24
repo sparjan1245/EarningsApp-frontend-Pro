@@ -1,0 +1,189 @@
+services:
+  # Backend Services
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authdb
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./backend/data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 10
+    networks:
+      - earnings-app-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+    networks:
+      - earnings-app-network
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - earnings-app-network
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - earnings-app-network
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./backend/authservice2
+      dockerfile: Dockerfile
+      target: runner
+    container_name: auth-service
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/authdb
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=your-jwt-secret-key-change-this-in-production
+      - JWT_EXPIRATION=15m
+      - GOOGLE_CLIENT_ID=389748895318-6m9dffki1nbjtm6rk97s7sfa101jogco.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
+      - GOOGLE_CALLBACK_URL=http://localhost:3001/api/auth/oauth/google/callback
+      - RESEND_API_KEY=re_DGcxSWQH_CBWLxuKqgqgxwLjefmtdAqmt
+      - EMAIL_FROM=onboarding@resend.dev
+      - PORT=3001
+      - NODE_ENV=production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+      - "50051:50051"  # gRPC port
+    volumes:
+      - ./backend/proto:/usr/src/app/proto
+    networks:
+      - earnings-app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/auth/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  adminservice:
+    build:
+      context: ./backend/adminservice
+      dockerfile: Dockerfile
+      target: runner
+    container_name: adminservice
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/admindb
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=your-jwt-secret-key-change-this-in-production
+      - JWT_EXPIRATION=30m
+      - REFRESH_TOKEN_SECRET=your_refresh_secret_key
+      - REFRESH_TOKEN_EXPIRATION=7d
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    ports:
+      - "3002:3002"
+      - "50052:50052"  # gRPC port
+    volumes:
+      - ./backend/proto:/usr/src/app/proto
+    networks:
+      - earnings-app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/api/admin/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+
+
+  gateway:
+    build:
+      context: ./backend/gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    environment:
+      - PORT=3000
+      - AUTHSERVICE_HOST=auth-service
+      - AUTHSERVICE_PORT=3001
+      - ADMINSERVICE_HOST=adminservice
+      - ADMINSERVICE_PORT=3002
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      adminservice:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/proto:/usr/src/app/proto
+    networks:
+      - earnings-app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend/earnings-calendar
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      gateway:
+        condition: service_healthy
+    networks:
+      - earnings-app-network
+    restart: unless-stopped
+
+networks:
+  earnings-app-network:
+    driver: bridge 
