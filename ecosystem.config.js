@@ -44,7 +44,7 @@ module.exports = {
     },
     {
       name: 'adminservice',
-      script: './backend/adminservice/dist/src/main.js',
+      script: './backend/adminservice/dist/main.js',
       cwd: '/var/www/earnings-app',
       instances: 1,
       exec_mode: 'fork',
