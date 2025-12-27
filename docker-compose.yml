@@ -73,10 +73,10 @@ services:
       - REDIS_PORT=6379
       - JWT_SECRET=your-jwt-secret-key-change-this-in-production
       - JWT_EXPIRATION=15m
-      - GOOGLE_CLIENT_ID=389748895318-6m9dffki1nbjtm6rk97s7sfa101jogco.apps.googleusercontent.com
-      - GOOGLE_CLIENT_SECRET=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
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_CALLBACK_URL=http://localhost:3001/api/auth/oauth/google/callback
-      - RESEND_API_KEY=re_DGcxSWQH_CBWLxuKqgqgxwLjefmtdAqmt
+      - RESEND_API_KEY=${RESEND_API_KEY:-your-resend-api-key}
       - EMAIL_FROM=onboarding@resend.dev
       - PORT=3001
       - NODE_ENV=production
