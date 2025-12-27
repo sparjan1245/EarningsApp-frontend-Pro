@@ -36,7 +36,7 @@ export class AdminGrpcClient implements OnModuleInit {
     options: {
       package: 'admin',
       protoPath: join(__dirname, '../../proto/admin.proto'),
-      url: 'adminservice:50052',
+      url: process.env.ADMIN_GRPC_URL || `${process.env.ADMINSERVICE_HOST || 'localhost'}:${process.env.ADMIN_GRPC_PORT || '50052'}`,
     },
   })
   private client: ClientGrpc;
