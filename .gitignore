@@ -61,4 +61,17 @@ coverage/
 
 # Upload directories (user-generated content)
 uploads/
-backend/*/uploads/ 
+backend/*/uploads/
+
+# Exclude extra deployment documentation MD files (keep essential README.md files)
+DEPLOYMENT_*.md
+VPS_*.md
+UPLOAD_*.md
+NEXT_STEPS.md
+QUICK_DEPLOY.md
+PRODUCTION_SETUP_SUMMARY.md
+CPANEL_*.md
+HOSTINGER_*.md
+FIX_*.md
+GIT_SETUP_INSTRUCTIONS.md
+QUICK_PUSH_COMMANDS.md 

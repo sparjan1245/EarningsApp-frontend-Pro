@@ -225,3 +225,6 @@ Once Gateway responds to `curl http://localhost:3000/health`:
 
 **Start by adding the missing environment variables in cPanel, then restart the application!**
 
+
+
+

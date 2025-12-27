@@ -206,3 +206,6 @@ ls -d ~/backend/*/node_modules/@nestjs/core && echo "✅ All services installed 
 
 Try Solution 1 first - it should work for most cases!
 
+
+
+
