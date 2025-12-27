@@ -20,7 +20,7 @@ export class AuthGrpcClient implements OnModuleInit {
     options: {
       package: 'auth',
       protoPath: join(__dirname, '../../proto/auth.proto'),
-      url: process.env.AUTH_GRPC_URL || `${process.env.AUTHSERVICE_HOST || 'localhost'}:${process.env.AUTH_GRPC_PORT || '50051'}`,
+      url: (process.env.AUTH_GRPC_URL || `${process.env.AUTHSERVICE_HOST || 'localhost'}:${process.env.AUTH_GRPC_PORT || '50051'}`).trim(),
     },
   })
   private client: ClientGrpc;
