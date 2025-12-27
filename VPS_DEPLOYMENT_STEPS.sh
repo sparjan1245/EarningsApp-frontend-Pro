@@ -148,19 +148,19 @@ else
 fi
 
 # ============================================
-# STEP 6: Install Dependencies
+# STEP 6: Install Dependencies (with dev for building)
 # ============================================
 echo -e "${YELLOW}📦 STEP 6: Installing dependencies...${NC}"
 cd backend/gateway
-npm ci --production
+npm ci
 cd ../..
 
 cd backend/authservice2
-npm ci --production
+npm ci
 cd ../..
 
 cd backend/adminservice
-npm ci --production
+npm ci
 cd ../..
 
 echo -e "${GREEN}✅ Dependencies installed${NC}"
